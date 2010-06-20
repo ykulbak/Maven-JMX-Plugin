@@ -16,10 +16,10 @@
 package com.custardsource.maven.plugins.jmx;
 
 
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import java.util.List;
+import javax.management.MBeanServerConnection;
+import java.io.IOException;
 
 /**
  * Goal which invokes a JMX operation.
@@ -44,10 +44,22 @@ public class ActionMojo extends AbstractJmxMojo {
     private Action[] actions;
 
 
-    public void execute()
-            throws MojoExecutionException {
-        //System.out.println("domain=" + ((DomainInstanceSelector)instance).domain);
-        //System.out.println("objectName=" + objectNameString);
+    public void execute() throws MojoExecutionException {
+        try {
+            super.interactWithAllLocalMBeanServers(new MBeanServerCallback() {
+                @Override
+                public void doWithMBeanServer(MBeanServerConnection mbeanServerConnection) throws Exception {
+                    if (localMBeanServer.choose(mbeanServerConnection)) {
+                        for (Action action : actions) {
+                            action.validate();
+                            action.execute(mbeanServerConnection);
+                        }
+                    }
+                }
+            });
+        } catch (IOException e) {
+            throw new MojoExecutionException("Failed while executing action ", e);
+        }
     }
 
 

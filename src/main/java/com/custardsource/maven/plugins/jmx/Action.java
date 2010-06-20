@@ -21,7 +21,7 @@ import javax.management.MBeanServerConnection;
 
 public interface Action {
 
-    boolean validate() throws MojoExecutionException;
+    void validate() throws MojoExecutionException;
 
-    boolean execute(MBeanServerConnection connection) throws Exception;
+    Object execute(MBeanServerConnection connection) throws Exception;
 }

@@ -15,9 +15,13 @@
  */
 package com.custardsource.maven.plugins.jmx;
 
+import org.apache.commons.beanutils.ConvertUtilsBean;
+import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 
 public class Invoke implements Action {
 
@@ -28,13 +32,31 @@ public class Invoke implements Action {
     private Parameter[] parameters;
 
     @Override
-    public boolean validate() throws MojoExecutionException {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    public void validate() throws MojoExecutionException {
+        if (StringUtils.isEmpty(objectName)) {
+            throw new MojoExecutionException("objectName can't be empty");
+        }
+
+        if (StringUtils.isEmpty(operation)) {
+            throw new MojoExecutionException("operation can't be empty");
+        }
+
     }
 
     @Override
-    public boolean execute(MBeanServerConnection connection) throws Exception {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    public Object execute(MBeanServerConnection connection) throws Exception {
+        ObjectName name = new ObjectName(objectName);
+        int len = parameters == null ? 0 : parameters.length;
+        String[] signature = new String[len];
+        Object[] arguments = new Object[len];
+
+        ConvertUtilsBean converter = new ConvertUtilsBean();
+
+        for (int i = 0; i < len; i++) {
+            signature[i] = parameters[i].getType();
+            arguments[i] = converter.convert(parameters[i].getValue(), ClassUtils.getClass(parameters[i].getType()));
+        }
+        return connection.invoke(name, operation, arguments, signature);
     }
 
 

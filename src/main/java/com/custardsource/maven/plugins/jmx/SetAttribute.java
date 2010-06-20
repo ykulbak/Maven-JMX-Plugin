@@ -15,9 +15,13 @@
  */
 package com.custardsource.maven.plugins.jmx;
 
+import org.apache.commons.beanutils.ConvertUtilsBean;
+import org.apache.commons.lang.ClassUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 
+import javax.management.Attribute;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 
 public class SetAttribute implements Action {
 
@@ -30,13 +34,17 @@ public class SetAttribute implements Action {
     private String type;
 
     @Override
-    public boolean validate() throws MojoExecutionException {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    public void validate() throws MojoExecutionException {
     }
 
     @Override
-    public boolean execute(MBeanServerConnection connection) throws Exception {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    public Object execute(MBeanServerConnection connection) throws Exception {
+        ObjectName name = new ObjectName(objectName);
+        ConvertUtilsBean converter = new ConvertUtilsBean();
+
+        Object attributeValue = converter.convert(value, ClassUtils.getClass(type));
+        connection.setAttribute(name, new Attribute(attributeName, attributeValue));
+        return connection.getAttribute(name, attributeName);
     }
 
     public String getObjectName() {
