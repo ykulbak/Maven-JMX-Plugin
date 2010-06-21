@@ -43,8 +43,11 @@ public class ActionMojo extends AbstractJmxMojo {
      */
     private Action[] actions;
 
-
+    @Override
     public void execute() throws MojoExecutionException {
+        sleep(2000);
+        getLog().info("JMX Actions mojo: start");
+        localMBeanServer.validate();
         try {
             super.interactWithAllLocalMBeanServers(new MBeanServerCallback() {
                 @Override
@@ -52,13 +55,21 @@ public class ActionMojo extends AbstractJmxMojo {
                     if (localMBeanServer.choose(mbeanServerConnection)) {
                         for (Action action : actions) {
                             action.validate();
-                            action.execute(mbeanServerConnection);
+                            Object result = action.execute(mbeanServerConnection);
+                            getLog().info("Successfully executed " + action + ", result=" + result);
                         }
                     }
                 }
             });
         } catch (IOException e) {
             throw new MojoExecutionException("Failed while executing action ", e);
+        }
+    }
+
+    private void sleep(long millis) {
+        try {
+            Thread.sleep( millis);
+        } catch (InterruptedException ignored) {
         }
     }
 

@@ -20,15 +20,9 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -49,6 +43,7 @@ public abstract class AbstractJmxMojo extends AbstractMojo {
             if (vm != null) {
                 JMXServiceURL connectorAddress = getConnectorAddress(desc, vm);
                 if (connectorAddress != null) {
+                    getLog().info("About to interact with " + desc.displayName());
                     interact(connectorAddress, callback);
                 }
             }

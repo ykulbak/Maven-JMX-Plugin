@@ -55,6 +55,9 @@ public class Invoke implements Action {
         for (int i = 0; i < len; i++) {
             signature[i] = parameters[i].getType();
             arguments[i] = converter.convert(parameters[i].getValue(), ClassUtils.getClass(parameters[i].getType()));
+            if (signature[i].equals("java.lang.String") && arguments[i] == null) {
+                arguments[i] = "";
+            }
         }
         return connection.invoke(name, operation, arguments, signature);
     }
@@ -84,5 +87,13 @@ public class Invoke implements Action {
         public String getType() {
             return type;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Invoke{" +
+                "objectName='" + objectName + '\'' +
+                ", operation='" + operation + '\'' +
+                '}';
     }
 }
